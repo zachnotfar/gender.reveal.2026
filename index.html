@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+<html><head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans,'system-ui');background:transparent;}
+.screen{display:none;flex-direction:column;align-items:center;padding:1.5rem 1rem 2rem;min-height:500px;width:100%;}
+.screen.active{display:flex;}
+h1{font-size:21px;font-weight:500;color:var(--color-text-primary,#111);margin-bottom:.35rem;text-align:center;}
+p.sub{font-size:14px;color:var(--color-text-secondary,#666);text-align:center;margin-bottom:1.25rem;line-height:1.6;}
+.field-label{font-size:11px;color:#888;margin-bottom:4px;align-self:flex-start;text-transform:uppercase;letter-spacing:.06em;}
+.field-wrap{width:100%;max-width:400px;margin-bottom:1rem;}
+input[type=text],input[type=password]{width:100%;padding:.65rem 1rem;font-size:15px;border:1.5px solid #ccc;border-radius:10px;font-family:inherit;background:#fff;color:#111;outline:none;transition:border-color .2s;}
+input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
+input.error{border-color:#993C1D;background:#fff8f6;}
+.guess-row{display:flex;gap:12px;width:100%;max-width:400px;margin-bottom:1.25rem;}
+.guess-btn{flex:1;padding:.8rem;border:2.5px solid #ddd;border-radius:12px;background:#f5f5f5;cursor:pointer;font-size:15px;font-weight:500;color:#777;font-family:inherit;transition:all .2s;}
+.guess-btn.sel-boy{background:#1565C0;border-color:#0D47A1;color:#fff;box-shadow:0 3px 10px rgba(21,101,192,.4);}
+.guess-btn.sel-girl{background:#C2185B;border-color:#880E4F;color:#fff;box-shadow:0 3px 10px rgba(194,24,91,.4);}
+.critter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:440px;margin-bottom:1.5rem;}
+.critter-card{background:#f5f5f5;border:2.5px solid #ddd;border-radius:16px;padding:1.1rem .5rem .9rem;cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;}
+.critter-card .icon{font-size:38px;display:block;margin-bottom:5px;}
+.critter-card .cname{font-size:13px;font-weight:600;color:#333;margin-bottom:2px;}
+.critter-card .ctype{font-size:11px;color:#888;}
+.critter-card.selected{background:#0F6E56;border-color:#085041;box-shadow:0 3px 14px rgba(15,110,86,.45);}
+.critter-card.selected .cname{color:#fff;}
+.critter-card.selected .ctype{color:#A7F3D0;}
+.btn-main{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.8rem 2rem;font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;transition:background .2s;}
+.btn-main:disabled{opacity:.35;cursor:not-allowed;}
+.btn-main:hover:not(:disabled){background:#085041;}
+.btn-continue{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.75rem 1.6rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;display:none;margin-top:.9rem;width:100%;}
+.btn-continue:hover{background:#085041;}
+.btn-giveup{background:transparent;border:1.5px solid #ccc;border-radius:10px;padding:.55rem 1.2rem;font-size:13px;cursor:pointer;font-family:inherit;color:#888;transition:all .2s;display:block;}
+.btn-giveup:hover{background:#f5f5f5;border-color:#aaa;color:#555;}
+.riddle-instructions{font-size:12px;color:#888;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:.55rem .8rem;margin-bottom:.85rem;line-height:1.5;}
+.riddle-wrap{width:100%;max-width:520px;}
+.riddle-header{display:flex;align-items:center;gap:14px;margin-bottom:.75rem;background:#f0f4f0;border:1px solid #c8ddc8;border-radius:14px;padding:.9rem 1.1rem;}
+.rh-icon{font-size:46px;line-height:1;}
+.rh-name{font-size:15px;font-weight:600;color:#1a1a1a;}
+.rh-sub{font-size:12px;color:#888;margin-top:1px;}
+.riddle-layout{display:flex;gap:18px;align-items:flex-start;}
+.riddle-q{background:#f0f4f0;border:1px solid #c8ddc8;border-radius:14px;padding:1.1rem;font-size:15px;color:#1a1a1a;line-height:1.7;text-align:center;margin-bottom:.75rem;font-style:italic;}
+.ans-input{width:100%;padding:.65rem 1rem;font-size:15px;border:1.5px solid #ccc;border-radius:10px;font-family:inherit;background:#fff;color:#111;outline:none;transition:border-color .2s;margin-bottom:4px;}
+.ans-input:focus{border-color:#0F6E56;}
+.ans-input.correct{border-color:#0F6E56;background:#f0faf4;}
+.wrong-msg{color:#993C1D;font-size:13px;text-align:center;min-height:18px;}
+.hint-item{font-size:13px;color:#555;background:#fffbe6;border-left:3px solid #F59E0B;border-radius:0 8px 8px 0;padding:6px 10px;margin-top:6px;}
+.answer-reveal{display:none;margin-top:.75rem;border-radius:10px;padding:.75rem 1rem;text-align:center;font-size:14px;line-height:1.5;}
+.answer-reveal.correct-msg{background:#E8F5E9;border:1.5px solid #81C784;color:#1B5E20;}
+.answer-reveal.giveup-msg{background:#E3F2FD;border:1.5px solid #90CAF9;color:#0D47A1;}
+.answer-reveal.toomany-msg{background:#FFF3E0;border:1.5px solid #FFB74D;color:#E65100;}
+.answer-reveal .ans-word{font-size:18px;font-weight:700;display:block;margin-top:3px;}
+.puzzle-col{width:96px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.pp-label{font-size:10px;color:#888;text-align:center;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.p-slot{width:88px;height:62px;border-radius:10px;border:2px dashed #ccc;background:#f0f0f0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.p-piece{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:row;gap:4px;border-radius:8px;transform:translateY(-90px) rotate(-5deg);opacity:0;transition:transform .6s cubic-bezier(.22,1.4,.6,1),opacity .35s;padding:0 6px;}
+.p-piece.landed{transform:translateY(0) rotate(0deg)!important;opacity:1!important;}
+.pp-its{background:linear-gradient(135deg,#1B5E20,#2E7D32);}
+.pp-a{background:linear-gradient(135deg,#2E7D32,#388E3C);}
+.pp-dots{background:linear-gradient(135deg,#388E3C,#43A047);}
+.p-emoji{font-size:15px;line-height:1;flex-shrink:0;}
+.p-word{font-size:15px;font-weight:700;color:#fff;font-family:Georgia,serif;line-height:1;flex-shrink:0;}
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #eee;width:100%;max-width:440px;font-size:14px;}
+.lb-name{flex:1;color:#222;}
+.lb-you{font-size:11px;color:#0F6E56;margin-left:4px;font-weight:700;}
+.lb-badge{padding:2px 10px;border-radius:20px;font-size:12px;font-weight:500;}
+.lb-boy{background:#E3F2FD;color:#0D47A1;}
+.lb-girl{background:#FCE4EC;color:#880E4F;}
+.tally{display:flex;gap:16px;margin:1rem 0 1.5rem;width:100%;max-width:440px;}
+.tally-box{flex:1;border-radius:10px;padding:.9rem;text-align:center;}
+.tally-box .num{font-size:26px;font-weight:700;}
+.tally-box .lbl{font-size:12px;margin-top:2px;}
+.boy-tally{background:#E3F2FD;color:#0D47A1;}
+.girl-tally{background:#FCE4EC;color:#880E4F;}
+#confetti-area{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;}
+#boy-reveal{display:none;position:fixed;inset:0;background:#fff;z-index:8888;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:0;}
+#boy-reveal.active{display:flex;}
+#boy-critters{font-size:52px;letter-spacing:18px;opacity:0;transform:translateY(20px);transition:opacity .7s .1s,transform .7s .1s;margin-bottom:1.4rem;line-height:1;text-align:center;}
+#boy-critters.show{opacity:1;transform:translateY(0);}
+#boy-word{font-size:78px;font-weight:900;color:#1565C0;font-family:Georgia,serif;letter-spacing:.03em;opacity:0;transform:scale(.4);transition:opacity .55s ease-out,transform .55s cubic-bezier(.22,1.3,.6,1);text-shadow:0 4px 24px rgba(21,101,192,.2);line-height:1.1;text-align:center;}
+#boy-word.pop{opacity:1;transform:scale(1);}
+#boy-sub{font-size:16px;color:#1565C0;opacity:0;margin-top:1rem;font-family:Georgia,serif;font-style:italic;transition:opacity .6s .4s;text-align:center;line-height:1.5;letter-spacing:.02em;}
+#boy-sub.show{opacity:1;}
+#boy-board-btn{margin-top:2.2rem;background:#fff;border:2.5px solid #C9A84C;border-radius:14px;padding:.85rem 2.2rem;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;color:#0D2B6B;opacity:0;transition:opacity .5s 1s;letter-spacing:.01em;box-shadow:0 2px 12px rgba(201,168,76,.25);}
+#boy-board-btn.show{opacity:1;}
+#boy-board-btn:hover{background:#FFFBEF;border-color:#B8922A;}
+
+/* Password gate */
+#sgate{background:linear-gradient(160deg,#0D2B1F 0%,#1B4332 50%,#0D2B1F 100%);}
+#sgate h1{color:#A7F3D0;font-family:Georgia,serif;font-size:24px;margin-bottom:.5rem;}
+#sgate p.sub{color:#6EE7B7;margin-bottom:2rem;}
+.gate-icon{font-size:64px;margin-bottom:1rem;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));}
+.gate-box{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:2rem 1.5rem;width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:1rem;}
+.gate-label{font-size:11px;color:#6EE7B7;text-transform:uppercase;letter-spacing:.1em;align-self:flex-start;}
+#gate-input{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:.75rem 1rem;font-size:15px;width:100%;font-family:inherit;outline:none;transition:border-color .2s;}
+#gate-input::placeholder{color:rgba(255,255,255,.35);}
+#gate-input:focus{border-color:#6EE7B7;}
+#gate-input.error{border-color:#F87171;animation:shake .35s ease;}
+#gate-error{font-size:13px;color:#F87171;min-height:18px;text-align:center;}
+#gate-btn{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.85rem 2.2rem;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;transition:background .2s;letter-spacing:.02em;}
+#gate-btn:hover{background:#085041;}
+.gate-hint{font-size:12px;color:rgba(255,255,255,.35);text-align:center;margin-top:.25rem;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+</style>
+</head>
+<body>
+<div id="confetti-area"></div>
+
+<div id="boy-reveal">
+  <div id="boy-critters"></div>
+  <div id="boy-word">IT'S A BOY!</div>
+  <div id="boy-sub">Baby boy coming this fall 🍂</div>
+  <button id="boy-board-btn" onclick="goLeaderboard()">🎉 See everyone's guesses</button>
+</div>
+
+<!-- PASSWORD GATE -->
+<div id="sgate" class="screen active">
+  <div class="gate-icon">🌲🔒🌲</div>
+  <h1>The Woods Are Waiting...</h1>
+  <p class="sub">Enter the secret password to begin your woodland adventure.</p>
+  <div class="gate-box">
+    <div class="gate-label">Password</div>
+    <input type="password" id="gate-input" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkGate()"/>
+    <div id="gate-error"></div>
+    <button id="gate-btn" onclick="checkGate()">🌿 Enter the Woods</button>
+  </div>
+  <p class="gate-hint">Ask the parents for the password!</p>
+</div>
+
+<!-- S0 -->
+<div id="s0" class="screen">
+  <h1>A secret waits in the woods...</h1>
+  <p class="sub">Enter your name, make your guess what baby will be, then pick your woodland guide!</p>
+  <div class="field-wrap">
+    <div class="field-label">Your name</div>
+    <input type="text" id="player-name" placeholder="e.g. Grandma Sue" oninput="val0()"/>
+  </div>
+  <div class="field-wrap">
+    <div class="field-label">Your guess</div>
+    <div class="guess-row">
+      <button class="guess-btn" id="gbtn-boy" onclick="pickGuess('boy')">👦 Boy</button>
+      <button class="guess-btn" id="gbtn-girl" onclick="pickGuess('girl')">👧 Girl</button>
+    </div>
+  </div>
+  <div class="field-wrap">
+    <div class="field-label">Your woodland guide</div>
+    <div class="critter-grid">
+      <button class="critter-card" onclick="pickCritter(this,'fox')"><span class="icon">🦊</span><div class="cname">The Fox</div><div class="ctype">Sly & cunning</div></button>
+      <button class="critter-card" onclick="pickCritter(this,'owl')"><span class="icon">🦉</span><div class="cname">The Owl</div><div class="ctype">Wise & knowing</div></button>
+      <button class="critter-card" onclick="pickCritter(this,'bear')"><span class="icon">🐻</span><div class="cname">The Bear</div><div class="ctype">Bold & curious</div></button>
+    </div>
+  </div>
+  <button class="btn-main" id="btn-s0" onclick="goMap(0)" disabled>Begin the trail</button>
+</div>
+
+<!-- MAP -->
+<div id="smap" class="screen">
+  <h1 id="map-title">Your woodland trail awaits</h1>
+  <p class="sub" id="map-sub">Three guides, three riddles — follow the trail to unlock the secret.</p>
+  <canvas id="map-canvas" width="520" height="350" style="width:100%;max-width:520px;border-radius:16px;border:3px solid #8B7355;box-shadow:0 4px 18px rgba(0,0,0,.18);"></canvas>
+  <button class="btn-main" id="map-btn" style="margin-top:1.25rem" onclick="continueFromMap()">Let's go →</button>
+</div>
+
+<!-- RIDDLE 1 -->
+<div id="s1" class="screen">
+  <div class="riddle-wrap">
+    <div class="riddle-header"><span class="rh-icon" id="rh-icon1"></span><div><div class="rh-name" id="rh-name1"></div><div class="rh-sub" id="rh-sub1"></div></div></div>
+    <div class="riddle-instructions">🌿 Take a guess! A hint appears after each wrong answer. The answer reveals itself after 3 tries.</div>
+    <div class="riddle-layout">
+      <div style="flex:1">
+        <div class="riddle-q" id="rq1"></div>
+        <input class="ans-input" type="text" id="ai1" placeholder="Your answer..." oninput="cw(1)" onkeydown="if(event.key==='Enter')ca(1)"/>
+        <div class="wrong-msg" id="wm1"></div>
+        <div id="ha1"></div>
+        <div class="answer-reveal" id="ar1"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:.75rem;flex-wrap:wrap;">
+          <button class="btn-main" id="submit1" onclick="ca(1)">Submit</button>
+          <button class="btn-giveup" id="gu1" onclick="giveUp(1)">I give up</button>
+        </div>
+        <button class="btn-continue" id="cont1" onclick="doContinue(1)">Continue on the trail →</button>
+      </div>
+      <div class="puzzle-col">
+        <div class="pp-label">The message</div>
+        <div class="p-slot"><div class="p-piece pp-its" id="pc0"><span class="p-emoji" id="pe_s1_0"></span><span class="p-word">It's</span></div></div>
+        <div class="p-slot"><div class="p-piece pp-a" id="pc1"><span class="p-emoji" id="pe_s1_1"></span><span class="p-word">A</span></div></div>
+        <div class="p-slot"><div class="p-piece pp-dots" id="pc2"><span class="p-emoji" id="pe_s1_2"></span><span class="p-word">...</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIDDLE 2 -->
+<div id="s2" class="screen">
+  <div class="riddle-wrap">
+    <div class="riddle-header"><span class="rh-icon" id="rh-icon2"></span><div><div class="rh-name" id="rh-name2"></div><div class="rh-sub" id="rh-sub2"></div></div></div>
+    <div class="riddle-instructions">🌿 Take a guess! A hint appears after each wrong answer. The answer reveals itself after 3 tries.</div>
+    <div class="riddle-layout">
+      <div style="flex:1">
+        <div class="riddle-q" id="rq2"></div>
+        <input class="ans-input" type="text" id="ai2" placeholder="Your answer..." oninput="cw(2)" onkeydown="if(event.key==='Enter')ca(2)"/>
+        <div class="wrong-msg" id="wm2"></div>
+        <div id="ha2"></div>
+        <div class="answer-reveal" id="ar2"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:.75rem;flex-wrap:wrap;">
+          <button class="btn-main" id="submit2" onclick="ca(2)">Submit</button>
+          <button class="btn-giveup" id="gu2" onclick="giveUp(2)">I give up</button>
+        </div>
+        <button class="btn-continue" id="cont2" onclick="doContinue(2)">Continue on the trail →</button>
+      </div>
+      <div class="puzzle-col">
+        <div class="pp-label">The message</div>
+        <div class="p-slot"><div class="p-piece pp-its landed"><span class="p-emoji" id="pe_s2_0"></span><span class="p-word">It's</span></div></div>
+        <div class="p-slot"><div class="p-piece pp-a" id="pc1b"><span class="p-emoji" id="pe_s2_1"></span><span class="p-word">A</span></div></div>
+        <div class="p-slot"><div class="p-piece pp-dots" id="pc2b"><span class="p-emoji" id="pe_s2_2"></span><span class="p-word">...</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIDDLE 3 -->
+<div id="s3" class="screen">
+  <div class="riddle-wrap">
+    <div class="riddle-header"><span class="rh-icon" id="rh-icon3"></span><div><div class="rh-name" id="rh-name3"></div><div class="rh-sub" id="rh-sub3"></div></div></div>
+    <div class="riddle-instructions">🌿 Take a guess! A hint appears after each wrong answer. The answer reveals itself after 3 tries.</div>
+    <div class="riddle-layout">
+      <div style="flex:1">
+        <div class="riddle-q" id="rq3"></div>
+        <input class="ans-input" type="text" id="ai3" placeholder="Your answer..." oninput="cw(3)" onkeydown="if(event.key==='Enter')ca(3)"/>
+        <div class="wrong-msg" id="wm3"></div>
+        <div id="ha3"></div>
+        <div class="answer-reveal" id="ar3"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:.75rem;flex-wrap:wrap;">
+          <button class="btn-main" id="submit3" onclick="ca(3)">Submit</button>
+          <button class="btn-giveup" id="gu3" onclick="giveUp(3)">I give up</button>
+        </div>
+        <button class="btn-continue" id="cont3" onclick="doContinue(3)">Head to the clearing →</button>
+      </div>
+      <div class="puzzle-col">
+        <div class="pp-label">The message</div>
+        <div class="p-slot"><div class="p-piece pp-its landed"><span class="p-emoji" id="pe_s3_0"></span><span class="p-word">It's</span></div></div>
+        <div class="p-slot"><div class="p-piece pp-a landed"><span class="p-emoji" id="pe_s3_1"></span><span class="p-word">A</span></div></div>
+        <div class="p-slot"><div class="p-piece pp-dots" id="pc2c"><span class="p-emoji" id="pe_s3_2"></span><span class="p-word">...</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WOODS -->
+<div id="swoods" class="screen" style="padding:0;min-height:440px;justify-content:center;overflow:hidden;border-radius:16px;">
+  <canvas id="woods-canvas" width="520" height="440" style="width:100%;max-width:520px;display:block;border-radius:16px;"></canvas>
+</div>
+
+<!-- PUZZLE PIECES -->
+<div id="spuzzle" class="screen" style="background:#0a0f0a;padding:1.5rem 1rem 2rem;min-height:520px;border-radius:16px;gap:16px;">
+  <p style="font-size:12px;color:#556;text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;">The secret reveals itself...</p>
+  <div id="puzzle-pieces" style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:380px;"></div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="slb" class="screen">
+  <h1>The woodland scoreboard</h1>
+  <p class="sub">Here's what everyone guessed!</p>
+  <div class="tally">
+    <div class="tally-box boy-tally"><div class="num" id="tb">0</div><div class="lbl">guessed boy</div></div>
+    <div class="tally-box girl-tally"><div class="num" id="tg">0</div><div class="lbl">guessed girl</div></div>
+  </div>
+  <div id="lb-list" style="width:100%;max-width:440px;"></div>
+</div>
+
+<script>
+var ST={name:'',guess:'',critter:null,mapStage:0,attempts:0,savedEntry:null,locked:{}};
+var CD={fox:{icon:'🦊',name:'The Fox',sub:'A quiz about baby animals'},owl:{icon:'🦉',name:'The Owl',sub:'A quiz about baby animals'},bear:{icon:'🐻',name:'The Bear',sub:'A quiz about baby animals'}};
+var POOLS={
+  fox:[
+    {animal:'platypus',q:"A baby platypus is one of nature's greatest surprises — a mammal that lays eggs and has a venomous spur! What is a baby platypus called?",answers:['puggle','a puggle'],hints:['Hint 1: Sounds like a mix between a pug and a snuggle.','Hint 2: Rhymes with "muggle".','Hint 3: P-U-G-G-L-E — puggle!']},
+    {animal:'shark',q:"This ocean predator is born ready to swim and hunt. Baby sharks stay near coral reefs to hide from larger predators. What is a baby shark called?",answers:['pup','pups','a pup'],hints:['Hint 1: Shares its name with a baby dog.','Hint 2: Rhymes with "cup".','Hint 3: P-U-P — pup!']},
+    {animal:'kangaroo',q:"This baby starts life at less than an inch long, crawls into its mother's pouch, and stays there for months. What is a baby kangaroo called?",answers:['joey','a joey','joeys'],hints:["Hint 1: Also a common human name.","Hint 2: Think of a baby marsupial tucked in a pouch.",'Hint 3: J-O-E-Y — joey!']},
+    {animal:'oyster',q:"Born floating freely in the ocean, this tiny creature eventually settles on a reef and builds a hard shell. What is a baby oyster called?",answers:['spat','a spat'],hints:['Hint 1: Also means a minor argument between friends.','Hint 2: Four letters, starts with S.','Hint 3: S-P-A-T — spat!']}
+  ],
+  owl:[
+    {animal:'owl',q:"The owl is one of the wisest creatures in the woods — so naturally its baby has a name worth knowing. What is a baby owl called?",answers:['owlet','an owlet','owlets'],hints:['Hint 1: Add a common baby-animal suffix to "owl".','Hint 2: Ends in "-let", like booklet or droplet.','Hint 3: O-W-L-E-T — owlet!']},
+    {animal:'swan',q:"This elegant bird mates for life. Its fluffy grey babies swim alongside their parents from just days old. What is a baby swan called?",answers:['cygnet','a cygnet','cygnets'],hints:['Hint 1: Comes from the Latin word for swan.','Hint 2: Starts with C and ends in "-net".','Hint 3: C-Y-G-N-E-T — cygnet!']},
+    {animal:'jellyfish',q:"This boneless, brainless drifter of the deep produces thousands of babies at a time. What is a baby jellyfish called?",answers:['ephyra','an ephyra','ephyrae'],hints:['Hint 1: Sounds like a name from ancient mythology.','Hint 2: Starts with E and ends in A.','Hint 3: E-P-H-Y-R-A — ephyra!']},
+    {animal:'hedgehog',q:"This spiny little creature curls into a ball when scared. Its babies are born with soft spines hidden under skin. What is a baby hedgehog called?",answers:['hoglet','a hoglet','hoglets'],hints:["Hint 1: Think of the animal's name — then make it small.",'Hint 2: Ends in "-let" like piglet.','Hint 3: H-O-G-L-E-T — hoglet!']}
+  ],
+  bear:[
+    {animal:'bear',q:"This big furry creature hibernates through winter — and its babies are born while the mother sleeps! What is a baby bear called?",answers:['cub','a cub','cubs'],hints:['Hint 1: Also used for a baby lion or wolf.','Hint 2: Three letters, starts with C.','Hint 3: C-U-B — cub!']},
+    {animal:'goat',q:"Playful and fearless, this farm animal's baby can walk within minutes of birth and loves to leap on anything it finds. What is a baby goat called?",answers:['kid','a kid','kids'],hints:['Hint 1: Also slang for a child.','Hint 2: Three letters, starts with K.','Hint 3: K-I-D — kid!']},
+    {animal:'otter',q:"These playful swimmers hold hands while they sleep so they don't drift apart. What is a baby otter called?",answers:['pup','a pup','pups','whelp','a whelp'],hints:['Hint 1: Baby dogs share this name.','Hint 2: Three letters, rhymes with "cup".','Hint 3: P-U-P — pup!']},
+    {animal:'deer',q:"Born with white spots for camouflage, this gentle creature can walk within hours of birth. What is a baby deer called?",answers:['fawn','a fawn','fawns'],hints:['Hint 1: Also a soft golden-brown color.','Hint 2: Four letters, starts with F.','Hint 3: F-A-W-N — fawn!']}
+  ]
+};
+var ORDER={fox:['fox','owl','bear'],owl:['owl','bear','fox'],bear:['bear','fox','owl']};
+var CR={};
+
+function checkGate(){
+  var val=document.getElementById('gate-input').value;
+  var inp=document.getElementById('gate-input');
+  var err=document.getElementById('gate-error');
+  if(val==='WoodlandReveal2026'){
+    err.textContent='';
+    inp.classList.remove('error');
+    show('s0');
+  } else {
+    inp.classList.add('error');
+    err.textContent='Incorrect password — ask the parents!';
+    setTimeout(()=>inp.classList.remove('error'),400);
+  }
+}
+
+function pickRiddles(){['fox','owl','bear'].forEach(k=>{var p=POOLS[k];CR[k]=p[Math.floor(Math.random()*p.length)];});}
+function lev(a,b){var m=a.length,n=b.length,dp=[];for(var i=0;i<=m;i++){dp[i]=[i];}for(var j=0;j<=n;j++){dp[0][j]=j;}for(var i=1;i<=m;i++)for(var j=1;j<=n;j++){dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);}return dp[m][n];}
+function isClose(inp,ans){var s=inp.trim().toLowerCase().replace(/[^a-z0-9 ]/g,'');for(var i=0;i<ans.length;i++){var a=ans[i].toLowerCase();if(s===a)return true;var t=a.length<=5?1:a.length<=9?2:3;if(lev(s,a)<=t)return true;var s2=s.replace(/\s+/g,''),a2=a.replace(/\s+/g,'');if(s2===a2||lev(s2,a2)<=t)return true;}return false;}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function val0(){var n=document.getElementById('player-name').value.trim();document.getElementById('btn-s0').disabled=!(n&&ST.guess&&ST.critter);}
+function pickGuess(g){ST.guess=g;document.getElementById('gbtn-boy').className='guess-btn'+(g==='boy'?' sel-boy':'');document.getElementById('gbtn-girl').className='guess-btn'+(g==='girl'?' sel-girl':'');val0();}
+function pickCritter(el,n){document.querySelectorAll('.critter-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');ST.critter=n;val0();}
+function cw(n){if(!ST.locked[n])document.getElementById('wm'+n).textContent='';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function setAllEmojis(){
+  var ord=ORDER[ST.critter];
+  var e=[CD[ord[0]].icon,CD[ord[1]].icon,CD[ord[2]].icon];
+  [['pe_s1_0',0],['pe_s1_1',1],['pe_s1_2',2],['pe_s2_0',0],['pe_s2_1',1],['pe_s2_2',2],['pe_s3_0',0],['pe_s3_1',1],['pe_s3_2',2]].forEach(([id,i])=>{var el=document.getElementById(id);if(el)el.textContent=e[i];});
+}
+
+function lockStep(step){
+  ST.locked[step]=true;
+  document.getElementById('ai'+step).disabled=true;
+  document.getElementById('submit'+step).disabled=true;
+  document.getElementById('gu'+step).style.display='none';
+}
+
+function showAnswerBanner(step,type){
+  var ord=ORDER[ST.critter];var key=ord[step-1];var r=CR[key];
+  var ans=r.answers[0],animal=r.animal;
+  var el=document.getElementById('ar'+step);el.style.display='block';
+  if(type==='correct'){el.className='answer-reveal correct-msg';el.innerHTML='Nice work! That\'s right. 🎉<span class="ans-word">A baby '+animal+' is called a '+ans+'!</span>';}
+  else if(type==='giveup'){el.className='answer-reveal giveup-msg';el.innerHTML='No worries — now you know! 💙<span class="ans-word">A baby '+animal+' is called a '+ans+'.</span>';}
+  else{el.className='answer-reveal toomany-msg';el.innerHTML='Almost! That was a tough one. 🌿<span class="ans-word">A baby '+animal+' is called a '+ans+'.</span>';}
+}
+
+function snapPiece(step){
+  if(step===1){document.getElementById('ai1').classList.add('correct');document.getElementById('pc0').classList.add('landed');}
+  else if(step===2){document.getElementById('ai2').classList.add('correct');var p=document.getElementById('pc1b');p.style.transform='translateY(0)';p.style.opacity='1';}
+  else{document.getElementById('ai3').classList.add('correct');var p2=document.getElementById('pc2c');p2.style.transform='translateY(0)';p2.style.opacity='1';}
+}
+
+function progressStep(step){lockStep(step);snapPiece(step);document.getElementById('cont'+step).style.display='block';}
+function doContinue(step){if(step===1){goMap(1);}else if(step===2){goMap(2);}else{startWoods();}}
+
+function ca(step){
+  if(ST.locked[step])return;
+  var inp=document.getElementById('ai'+step).value;
+  var ord=ORDER[ST.critter];var r=CR[ord[step-1]];
+  if(isClose(inp,r.answers)){showAnswerBanner(step,'correct');progressStep(step);}
+  else{
+    ST.attempts++;
+    document.getElementById('wm'+step).textContent='Not quite — try again!';
+    var ha=document.getElementById('ha'+step);var idx=ST.attempts-1;
+    if(idx<r.hints.length){var d=document.createElement('div');d.className='hint-item';d.textContent=r.hints[idx];ha.appendChild(d);}
+    if(ST.attempts>=3){showAnswerBanner(step,'toomany');progressStep(step);}
+  }
+}
+function giveUp(step){if(ST.locked[step])return;showAnswerBanner(step,'giveup');progressStep(step);}
+
+async function goMap(stage){
+  if(stage===0){
+    var n=document.getElementById('player-name').value.trim();
+    if(!n||!ST.guess||!ST.critter)return;
+    ST.name=n;pickRiddles();ST.locked={};ST.attempts=0;
+    var btn=document.getElementById('btn-s0');btn.disabled=true;btn.textContent='Saving...';
+    var entry={name:n,guess:ST.guess,ts:Date.now()};ST.savedEntry=entry;
+    await saveGuess(entry);
+    btn.textContent='Begin the trail';
+    setAllEmojis();
+  }
+  ST.mapStage=stage;ST.attempts=0;drawMap();
+  var titles=['Your woodland trail awaits','The trail glows — a new guide appears!','Almost there — the clearing beckons!'];
+  var subs=['Three guides, three riddles — follow the glowing trail to unlock the secret.','You solved the first riddle! Push on to Mossy Ridge.','Two down — the final critter waits at the clearing!'];
+  var btns=['Begin the journey →','Continue to Mossy Ridge →','Head to the Clearing →'];
+  document.getElementById('map-title').textContent=titles[stage];
+  document.getElementById('map-sub').textContent=subs[stage];
+  document.getElementById('map-btn').textContent=btns[stage];
+  show('smap');
+}
+
+function continueFromMap(){
+  if(ST.mapStage===0){loadRiddle(1);show('s1');}
+  else if(ST.mapStage===1){loadRiddle(2);show('s2');}
+  else{loadRiddle(3);show('s3');}
+}
+
+function loadRiddle(step){
+  var ord=ORDER[ST.critter];var key=ord[step-1];var c=CD[key],r=CR[key];
+  var suffixes=['leads the way!','appears on the trail!','waits at the clearing!'];
+  document.getElementById('rh-icon'+step).textContent=c.icon;
+  document.getElementById('rh-name'+step).textContent=c.name+' '+suffixes[step-1];
+  document.getElementById('rh-sub'+step).textContent=c.sub;
+  document.getElementById('rq'+step).textContent=r.q;
+  document.getElementById('ai'+step).value='';
+  document.getElementById('ai'+step).disabled=false;
+  document.getElementById('ai'+step).classList.remove('correct');
+  document.getElementById('wm'+step).textContent='';
+  document.getElementById('ha'+step).innerHTML='';
+  document.getElementById('ar'+step).style.display='none';
+  document.getElementById('submit'+step).disabled=false;
+  document.getElementById('gu'+step).style.display='block';
+  document.getElementById('cont'+step).style.display='none';
+  ST.locked[step]=false;ST.attempts=0;
+}
+
+function drawMap(){
+  var cv=document.getElementById('map-canvas'),ctx=cv.getContext('2d'),W=520,H=350;
+  ctx.clearRect(0,0,W,H);
+  var bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#F7EDD0');bg.addColorStop(.5,'#EDD9A3');bg.addColorStop(1,'#E2C97E');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  var vig=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.85);vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(80,50,10,.22)');ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#7A6340';ctx.lineWidth=5;ctx.strokeRect(4,4,W-8,H-8);ctx.strokeStyle='#B09060';ctx.lineWidth=1.5;ctx.strokeRect(9,9,W-18,H-18);
+  [[14,14],[W-14,14],[14,H-14],[W-14,H-14]].forEach(([cx,cy])=>{ctx.strokeStyle='#7A6340';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(cx-11,cy);ctx.lineTo(cx+11,cy);ctx.moveTo(cx,cy-11);ctx.lineTo(cx,cy+11);ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fillStyle='#7A6340';ctx.fill();});
+  ctx.fillStyle='rgba(90,58,18,.12)';roundRect(ctx,W/2-105,12,210,28,5);ctx.fill();ctx.fillStyle='#4A3010';ctx.font='bold 15px Georgia,serif';ctx.textAlign='center';ctx.fillText('✦  WOODLAND TRAIL MAP  ✦',W/2,31);
+  ctx.strokeStyle='#9A7A40';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(22,38);ctx.lineTo(W-22,38);ctx.stroke();
+  [['#C5D9A0',120,100,88,52],['#BDD094',280,80,70,44],['#C8DC9C',390,130,75,46],['#BBD08A',170,240,85,48],['#C0D896',360,250,70,42]].forEach(([c,x,y,rw,rh])=>{ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rw/2,rh/2,0,0,Math.PI*2);ctx.fill();});
+  ctx.strokeStyle='#7AABBF';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(16,195);ctx.bezierCurveTo(60,182,95,210,148,206);ctx.bezierCurveTo(195,202,215,186,255,192);ctx.stroke();ctx.strokeStyle='#A0D0E8';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(16,195);ctx.bezierCurveTo(60,182,95,210,148,206);ctx.bezierCurveTo(195,202,215,186,255,192);ctx.stroke();
+  ctx.fillStyle='#3A7A8A';ctx.font='italic 9px Georgia,serif';ctx.textAlign='left';ctx.fillText('Whispering Creek',24,190);
+  function mtn(x,y,w,h){ctx.fillStyle='#A08860';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-w/2,y+h);ctx.lineTo(x+w/2,y+h);ctx.closePath();ctx.fill();ctx.fillStyle='#C8AA80';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-w*.12,y+h*.22);ctx.lineTo(x+w*.12,y+h*.22);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(255,255,255,.75)';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-w*.07,y+h*.12);ctx.lineTo(x+w*.07,y+h*.12);ctx.closePath();ctx.fill();}
+  mtn(462,52,58,52);mtn(438,62,42,44);mtn(488,60,46,46);ctx.fillStyle='#6A5030';ctx.font='italic 8px Georgia,serif';ctx.textAlign='center';ctx.fillText('Misty Peaks',462,114);
+  function mapTree(x,y,s,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,s,0,Math.PI*2);ctx.fill();ctx.fillStyle='#2E5828';ctx.beginPath();ctx.arc(x-s*.18,y-s*.14,s*.6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5C3A10';ctx.fillRect(x-1.5,y+s*.5,3,s*.7);}
+  [[38,115,11,'#4A8040'],[68,92,10,'#3A7030'],[105,128,11,'#4A8040'],[48,172,9,'#3A7030'],[298,125,12,'#4A8040'],[332,106,10,'#3A7030'],[365,140,11,'#4A8040'],[408,116,12,'#3A7030'],[448,138,9,'#4A8040'],[472,96,10,'#3A7030'],[468,148,10,'#4A8040'],[58,278,10,'#3A7030'],[88,260,11,'#4A8040'],[118,290,9,'#3A7030'],[400,268,11,'#4A8040'],[435,250,10,'#3A7030'],[465,278,11,'#4A8040'],[240,55,10,'#3A7030'],[260,40,9,'#4A8040']].forEach(([x,y,s,c])=>mapTree(x,y,s,c));
+  ctx.fillStyle='#8AC8DC';ctx.beginPath();ctx.ellipse(310,215,32,18,-.2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#A8D8EC';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(310,215,32,18,-.2,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#3A7A8A';ctx.font='italic 8px Georgia,serif';ctx.textAlign='center';ctx.fillText('Mirror Lake',310,227);
+  var wp=[{x:95,y:268},{x:258,y:222},{x:408,y:255}];
+  ctx.setLineDash([7,5]);ctx.strokeStyle='#7A5530';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(wp[0].x,wp[0].y);wp.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.setLineDash([]);
+  if(ST.mapStage>0){ctx.strokeStyle='rgba(255,210,60,.6)';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(wp[0].x,wp[0].y);if(ST.mapStage>=1)ctx.lineTo(wp[1].x,wp[1].y);if(ST.mapStage>=2)ctx.lineTo(wp[2].x,wp[2].y);ctx.stroke();}
+  var ord=ORDER[ST.critter];var wpLabels=['Trailhead','Mossy Ridge','The Clearing'];
+  wp.forEach((p,i)=>{
+    var unlocked=i<=ST.mapStage;
+    ctx.beginPath();ctx.arc(p.x+2,p.y+2,20,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.18)';ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,20,0,Math.PI*2);ctx.fillStyle=unlocked?'#0F6E56':'#B8A880';ctx.fill();
+    ctx.strokeStyle=unlocked?'#fff':'#D4C090';ctx.lineWidth=2.5;ctx.stroke();
+    ctx.globalAlpha=unlocked?1:.45;ctx.font='18px serif';ctx.textAlign='center';ctx.fillText(CD[ord[i]].icon,p.x,p.y+6);ctx.globalAlpha=1;
+    ctx.font='bold 8px Georgia,serif';ctx.fillStyle=unlocked?'#2A1A08':'#7A6840';ctx.textAlign='center';ctx.fillText(wpLabels[i],p.x,p.y+32);
+    ctx.font='italic 8px Georgia,serif';ctx.fillStyle=unlocked?'#3A5A30':'#9A8A60';ctx.fillText(CD[ord[i]].name,p.x,p.y+42);
+    if(!unlocked){ctx.font='10px serif';ctx.fillStyle='rgba(255,255,255,.6)';ctx.textAlign='center';ctx.fillText('🔒',p.x,p.y+7);}
+  });
+  var cx2=462,cy2=285,cr=24;ctx.fillStyle='rgba(245,230,195,.95)';ctx.beginPath();ctx.arc(cx2,cy2,cr+4,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#8B7040';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(cx2,cy2,cr+4,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#8B7040';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(cx2,cy2,cr,0,Math.PI*2);ctx.stroke();
+  [['N',0,'#C0392B'],['S',Math.PI,'#5C3D11'],['E',Math.PI/2,'#5C3D11'],['W',-Math.PI/2,'#5C3D11']].forEach(([lbl,ang,col])=>{var nx=cx2+Math.sin(ang)*(cr*.72),ny=cy2-Math.cos(ang)*(cr*.72);ctx.fillStyle=col;ctx.font='bold 9px Georgia,serif';ctx.textAlign='center';ctx.fillText(lbl,nx,ny+3);});
+  ctx.fillStyle='#C0392B';ctx.beginPath();ctx.moveTo(cx2,cy2-cr*.52);ctx.lineTo(cx2-5,cy2+4);ctx.lineTo(cx2+5,cy2+4);ctx.closePath();ctx.fill();ctx.fillStyle='#9A8060';ctx.beginPath();ctx.moveTo(cx2,cy2+cr*.52);ctx.lineTo(cx2-5,cy2-4);ctx.lineTo(cx2+5,cy2-4);ctx.closePath();ctx.fill();ctx.beginPath();ctx.arc(cx2,cy2,4,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#8B7040';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='rgba(248,236,205,.93)';ctx.strokeStyle='#8B7040';ctx.lineWidth=1;roundRect(ctx,16,48,118,100,6);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#4A3010';ctx.font='bold 9px Georgia,serif';ctx.textAlign='left';ctx.fillText('LEGEND',22,63);ctx.font='9px Georgia,serif';ctx.fillStyle='#3A2A08';ctx.fillText('🌲  Forest',22,78);ctx.fillText('〰  Whispering Creek',22,92);ctx.fillText('⛰  Misty Peaks',22,106);ctx.fillText('🔵  Mirror Lake',22,120);ctx.setLineDash([5,3]);ctx.strokeStyle='#7A5530';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(22,130);ctx.lineTo(60,130);ctx.stroke();ctx.setLineDash([]);ctx.font='9px Georgia,serif';ctx.fillStyle='#3A2A08';ctx.fillText('Trail',64,133);
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+function startWoods(){
+  show('swoods');
+  var cv=document.getElementById('woods-canvas'),ctx=cv.getContext('2d'),W=520,H=440,t=0;
+  var ord=ORDER[ST.critter];var emojis=ord.map(k=>CD[k].icon);
+  var critters=[{x:-30,spd:2.1,emoji:emojis[0],bob:0,size:54},{x:-155,spd:1.85,emoji:emojis[1],bob:1.8,size:50},{x:-280,spd:1.65,emoji:emojis[2],bob:3.4,size:52}];
+  var fireflies=Array.from({length:28},()=>({x:Math.random()*W,y:H*.15+Math.random()*H*.55,ph:Math.random()*Math.PI*2,spd:.025+Math.random()*.035}));
+  var particles=Array.from({length:18},()=>({x:W*.3+Math.random()*W*.4,y:H*.3+Math.random()*H*.4,vx:(Math.random()-.5)*.4,vy:-.3-Math.random()*.4,alpha:Math.random(),size:2+Math.random()*3}));
+  var trees=[[25,44,true],[82,50,false],[148,42,true],[205,52,false],[272,58,true],[330,46,false],[395,50,true],[455,44,false],[500,54,true],[55,36,false],[170,38,true],[310,40,false],[440,36,true]];
+  function drawTree(x,sz,shade){var cols=shade?['#06150A','#081C0C','#0A2210','#0D2814']:['#0D2814','#122E18','#163618','#1A401C'];for(var i=3;i>=0;i--){var tw=sz*(1.1+i*.28),th=sz*(1.5+i*.32),ty=H*.86-th+i*sz*.14;ctx.fillStyle=cols[i];ctx.beginPath();ctx.moveTo(x,ty);ctx.lineTo(x-tw/2,ty+th);ctx.lineTo(x+tw/2,ty+th);ctx.closePath();ctx.fill();}ctx.fillStyle='#1A0E04';ctx.fillRect(x-sz*.11,H*.86,sz*.22,sz*.45);}
+  function frame(){
+    t++;var prog=Math.min(t/280,1);
+    var r2=Math.round(5+prog*130),g2=Math.round(10+prog*110),b2=Math.round(15+prog*40);
+    var sky=ctx.createLinearGradient(0,0,0,H*.65);sky.addColorStop(0,'rgb('+Math.max(r2-20,0)+','+Math.max(g2-20,0)+','+Math.max(b2+10,0)+')');sky.addColorStop(1,'rgb('+r2+','+g2+','+b2+')');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H*.65);
+    if(prog<.45){var sa=(1-prog/.45)*.8;ctx.fillStyle='rgba(255,255,255,'+sa+')';[[65,35],[180,20],[285,50],[390,28],[470,40],[130,60],[350,18],[490,55],[220,38]].forEach(([sx,sy])=>{ctx.beginPath();ctx.arc(sx,sy,1.4+Math.sin(t*.08+sx)*.5,0,Math.PI*2);ctx.fill();});}
+    if(prog<.35){var ma=(1-prog/.35)*.7;ctx.fillStyle='rgba(240,235,210,'+ma+')';ctx.beginPath();ctx.arc(80,60,16,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(200,190,160,'+ma*.6+')';ctx.beginPath();ctx.arc(88,55,13,0,Math.PI*2);ctx.fill();}
+    if(prog>.3){var sp=(prog-.3)/.7,sunX=W*.7,sunY=H*.48-sp*H*.36,sunR=14+sp*18;var halo=ctx.createRadialGradient(sunX,sunY,sunR*.5,sunX,sunY,sunR*5);halo.addColorStop(0,'rgba(255,230,120,'+(sp*.7)+')');halo.addColorStop(.35,'rgba(255,180,60,'+(sp*.35)+')');halo.addColorStop(.7,'rgba(255,130,20,'+(sp*.12)+')');halo.addColorStop(1,'rgba(255,100,0,0)');ctx.fillStyle=halo;ctx.fillRect(0,0,W,H);ctx.beginPath();ctx.arc(sunX,sunY,sunR,0,Math.PI*2);ctx.fillStyle='rgba(255,248,200,'+(sp*.98)+')';ctx.fill();}
+    var gr=ctx.createLinearGradient(0,H*.75,0,H);gr.addColorStop(0,'#1C4A1C');gr.addColorStop(.5,'#143A14');gr.addColorStop(1,'#0C280C');ctx.fillStyle=gr;ctx.fillRect(0,H*.75,W,H*.25);ctx.fillStyle='rgba(28,65,20,.7)';ctx.fillRect(0,H*.68,W,H*.1);
+    ctx.strokeStyle='rgba(100,75,35,.55)';ctx.lineWidth=28;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-20,H*.91);ctx.quadraticCurveTo(W*.48,H*.79,W+20,H*.88);ctx.stroke();
+    if(prog>.38){var gp=(prog-.38)/.62;ctx.strokeStyle='rgba(255,220,90,'+(gp*.55)+')';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-20,H*.91);ctx.quadraticCurveTo(W*.48,H*.79,W+20,H*.88);ctx.stroke();}
+    trees.forEach(([x,s,d])=>drawTree(x,s,d));
+    fireflies.forEach(ff=>{ff.ph+=ff.spd;var fa=(.5+.5*Math.sin(ff.ph))*(prog<.55?1:Math.max(0,1-(prog-.55)/.35));if(fa>.05){var fx=ff.x+Math.sin(ff.ph*.6)*10,fy=ff.y+Math.cos(ff.ph*.4)*6;ctx.beginPath();ctx.arc(fx,fy,2.2,0,Math.PI*2);ctx.fillStyle='rgba(190,255,80,'+fa+')';ctx.fill();ctx.beginPath();ctx.arc(fx,fy,7,0,Math.PI*2);ctx.fillStyle='rgba(190,255,80,'+(fa*.15)+')';ctx.fill();}});
+    if(prog>.5){particles.forEach(pa=>{pa.y+=pa.vy;pa.x+=pa.vx;pa.alpha-=.004;if(pa.alpha<=0){pa.y=H*.5+Math.random()*H*.3;pa.x=W*.3+Math.random()*W*.4;pa.alpha=.5+Math.random()*.4;}ctx.beginPath();ctx.arc(pa.x,pa.y,pa.size,0,Math.PI*2);ctx.fillStyle='rgba(255,240,160,'+(pa.alpha*(prog-.5)/.5)+')';ctx.fill();});}
+    critters.forEach(cr=>{cr.x+=cr.spd;var bobY=Math.sin(t*.16+cr.bob)*5;if(cr.x<W+80){var cy2=H*.865+bobY;ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(cr.x,H*.895,cr.size*.55,cr.size*.15,0,0,Math.PI*2);ctx.fill();if(prog>.4){var cg=(prog-.4)/.6;var glow=ctx.createRadialGradient(cr.x,cy2,0,cr.x,cy2,cr.size*1.1);glow.addColorStop(0,'rgba(255,220,100,'+(cg*.3)+')');glow.addColorStop(1,'rgba(255,200,80,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cr.x,cy2,cr.size*1.1,0,Math.PI*2);ctx.fill();}ctx.font=cr.size+'px serif';ctx.textAlign='center';ctx.fillText(cr.emoji,cr.x,cy2+cr.size*.36);}});
+    if(prog>.62){var bl=(prog-.62)/.38;var clr=ctx.createRadialGradient(W*.68,H*.5,0,W*.68,H*.5,W*.6);clr.addColorStop(0,'rgba(255,235,140,'+(bl*.5)+')');clr.addColorStop(.45,'rgba(255,200,80,'+(bl*.22)+')');clr.addColorStop(1,'rgba(255,160,40,0)');ctx.fillStyle=clr;ctx.fillRect(0,0,W,H);}
+    if(prog>.78&&prog<.95){var tp=(prog-.78)/.17,tp2=prog>.9?(1-(prog-.9)/.05):1;ctx.globalAlpha=Math.min(tp,tp2)*.9;ctx.fillStyle='#fff';ctx.font='500 18px Georgia,serif';ctx.textAlign='center';ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=10;ctx.fillText('The clearing awaits...',W/2,H*.38);ctx.shadowBlur=0;ctx.globalAlpha=1;}
+    if(prog>.88){var fw=(prog-.88)/.12;ctx.fillStyle='rgba(255,250,235,'+fw+')';ctx.fillRect(0,0,W,H);}
+    if(t<290){requestAnimationFrame(frame);}else{setTimeout(startPuzzle,250);}
+  }
+  requestAnimationFrame(frame);
+}
+
+function startPuzzle(){
+  show('spuzzle');
+  var container=document.getElementById('puzzle-pieces');container.innerHTML='';
+  var ord=ORDER[ST.critter];var emojis=ord.map(k=>CD[k].icon);
+  var pieces=[
+    {word:"It's",emoji:emojis[0],bg:'linear-gradient(135deg,#1B5E20,#2E7D32)',delay:800},
+    {word:'A',emoji:emojis[1],bg:'linear-gradient(135deg,#2E7D32,#388E3C)',delay:2200},
+    {word:'...',emoji:emojis[2],bg:'linear-gradient(135deg,#388E3C,#43A047)',delay:3800}
+  ];
+  pieces.forEach((pc,i)=>{
+    var slot=document.createElement('div');slot.style.cssText='width:100%;height:130px;border-radius:16px;border:2.5px dashed rgba(255,255,255,.15);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:border-color .3s;';
+    var piece=document.createElement('div');piece.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:14px;background:'+pc.bg+';transform:translateY(-160px) rotate(-4deg);opacity:0;transition:transform .7s cubic-bezier(.22,1.4,.6,1),opacity .4s,box-shadow .4s;';
+    var emoji=document.createElement('span');emoji.textContent=pc.emoji;emoji.style.cssText='font-size:32px;line-height:1;';
+    var word=document.createElement('span');word.textContent=pc.word;word.style.cssText='font-size:'+(i===2?34:38)+'px;font-weight:700;color:#fff;font-family:Georgia,serif;letter-spacing:.02em;text-shadow:0 2px 12px rgba(0,0,0,.4);';
+    piece.appendChild(emoji);piece.appendChild(word);slot.appendChild(piece);container.appendChild(slot);
+    setTimeout(()=>{
+      slot.style.borderColor='rgba(255,220,80,.8)';
+      setTimeout(()=>{
+        slot.style.borderColor='rgba(255,255,255,.1)';piece.style.transform='translateY(0) rotate(0deg)';piece.style.opacity='1';
+        piece.style.boxShadow='0 0 35px rgba(100,200,100,.45)';setTimeout(()=>piece.style.boxShadow='none',700);
+        if(i===2){setTimeout(showBoyReveal,1400);}
+      },320);
+    },pc.delay);
+  });
+}
+
+function showBoyReveal(){
+  var ord=ORDER[ST.critter];var emojis=ord.map(k=>CD[k].icon);
+  document.getElementById('boy-critters').textContent=emojis.join('  ');
+  var el=document.getElementById('boy-reveal');el.classList.add('active');
+  setTimeout(()=>{
+    document.getElementById('boy-critters').classList.add('show');
+    setTimeout(()=>{
+      document.getElementById('boy-word').classList.add('pop');
+      setTimeout(()=>{document.getElementById('boy-sub').classList.add('show');document.getElementById('boy-board-btn').classList.add('show');},400);
+    },500);
+    launchBoyConfetti();
+  },150);
+}
+
+function launchBoyConfetti(){
+  var area=document.getElementById('confetti-area');
+  var cols=['#E3F2FD','#BBDEFB','#90CAF9','#64B5F6','#42A5F5','#1E88E5','#1565C0','#FFFFFF'];
+  for(var i=0;i<140;i++){
+    setTimeout(function(){
+      var el=document.createElement('div');var sz=Math.random()*13+5;var shape=Math.random();
+      var css='position:fixed;width:'+sz+'px;height:'+sz+'px;background:'+cols[Math.floor(Math.random()*cols.length)]+';left:'+Math.random()*100+'vw;top:-24px;opacity:.95;transition:top '+(3+Math.random()*1.5)+'s ease-in,opacity '+(3+Math.random()*1.5)+'s;pointer-events:none;z-index:9999;';
+      if(shape<.5){css+='border-radius:50%';}else if(shape<.75){css+='border-radius:2px;transform:rotate('+Math.random()*45+'deg)';}else{css+='width:'+(sz*.4)+'px;border-radius:1px';}
+      el.style.cssText=css;area.appendChild(el);setTimeout(()=>{el.style.top=(58+Math.random()*42)+'vh';el.style.opacity='0';},40);setTimeout(()=>el.remove(),5000);
+    },i*18);
+  }
+}
+
+function goLeaderboard(){document.getElementById('boy-reveal').classList.remove('active');show('slb');loadLB();}
+async function loadLB(){
+  var list=[];
+  try{var res=await window.storage.get('gr_guesses',true);if(res)list=JSON.parse(res.value);}catch(e){}
+  if(ST.savedEntry&&!list.find(x=>x.ts===ST.savedEntry.ts))list.push(ST.savedEntry);
+  document.getElementById('tb').textContent=list.filter(x=>x.guess==='boy').length;
+  document.getElementById('tg').textContent=list.filter(x=>x.guess==='girl').length;
+  var lb=document.getElementById('lb-list');
+  if(!list.length){lb.innerHTML='<div style="color:#888;font-size:14px;text-align:center;margin-top:1rem;">No guesses yet!</div>';return;}
+  lb.innerHTML=list.slice().reverse().map(e=>{
+    var you=ST.savedEntry&&e.ts===ST.savedEntry.ts;
+    var badge=e.guess==='boy'?'<span class="lb-badge lb-boy">Boy</span>':'<span class="lb-badge lb-girl">Girl</span>';
+    var youtag=you?'<span class="lb-you">✓ you</span>':'';
+    return '<div class="lb-row" style="'+(you?'font-weight:600;':'')+'"><span class="lb-name">'+esc(e.name)+youtag+'</span>'+badge+'</div>';
+  }).join('');
+}
+async function saveGuess(entry){
+  try{var ex=null;try{ex=await window.storage.get('gr_guesses',true);}catch(e){}var list=ex?JSON.parse(ex.value):[];list.push(entry);await window.storage.set('gr_guesses',JSON.stringify(list),true);}catch(e){console.error(e);}
+}
+</script>
+</body></html>
