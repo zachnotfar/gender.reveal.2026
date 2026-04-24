@@ -84,8 +84,6 @@ input.error{border-color:#993C1D;background:#fff8f6;}
 #boy-board-btn{margin-top:2.2rem;background:#fff;border:2.5px solid #C9A84C;border-radius:14px;padding:.85rem 2.2rem;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;color:#0D2B6B;opacity:0;transition:opacity .5s 1s;letter-spacing:.01em;box-shadow:0 2px 12px rgba(201,168,76,.25);}
 #boy-board-btn.show{opacity:1;}
 #boy-board-btn:hover{background:#FFFBEF;border-color:#B8922A;}
-
-/* Password gate */
 #sgate{background:linear-gradient(160deg,#0D2B1F 0%,#1B4332 50%,#0D2B1F 100%);}
 #sgate h1{color:#A7F3D0;font-family:Georgia,serif;font-size:24px;margin-bottom:.5rem;}
 #sgate p.sub{color:#6EE7B7;margin-bottom:2rem;}
@@ -105,7 +103,6 @@ input.error{border-color:#993C1D;background:#fff8f6;}
 </head>
 <body>
 <div id="confetti-area"></div>
-
 <div id="boy-reveal">
   <div id="boy-critters"></div>
   <div id="boy-word">IT'S A BOY!</div>
@@ -267,6 +264,53 @@ input.error{border-color:#993C1D;background:#fff8f6;}
   <div id="lb-list" style="width:100%;max-width:440px;"></div>
 </div>
 
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyAuHlBGb_xhOpvNGLdza0WnRgreqGGd4rU',
+  authDomain: 'woodland-reveal.firebaseapp.com',
+  databaseURL: 'https://woodland-reveal-default-rtdb.firebaseio.com',
+  projectId: 'woodland-reveal',
+  storageBucket: 'woodland-reveal.appspot.com',
+  messagingSenderId: '1234567890',
+  appId: 'woodland-reveal'
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const guessesRef = ref(db, 'guesses');
+
+// Expose Firebase functions to global scope
+window._fbPush = async function(entry) {
+  try {
+    await push(guessesRef, entry);
+    return true;
+  } catch(e) {
+    console.error('Firebase write error:', e);
+    return false;
+  }
+};
+
+window._fbListen = function(callback) {
+  onValue(guessesRef, (snapshot) => {
+    const data = snapshot.val();
+    const list = data ? Object.values(data) : [];
+    callback(list);
+  });
+};
+
+// Auto-refresh leaderboard when data changes
+window._fbListen(function(list) {
+  if(document.getElementById('slb').classList.contains('active')) {
+    window._renderLB(list);
+  }
+  window._liveList = list;
+});
+</script>
+
 <script>
 var ST={name:'',guess:'',critter:null,mapStage:0,attempts:0,savedEntry:null,locked:{}};
 var CD={fox:{icon:'🦊',name:'The Fox',sub:'A quiz about baby animals'},owl:{icon:'🦉',name:'The Owl',sub:'A quiz about baby animals'},bear:{icon:'🐻',name:'The Bear',sub:'A quiz about baby animals'}};
@@ -292,15 +336,14 @@ var POOLS={
 };
 var ORDER={fox:['fox','owl','bear'],owl:['owl','bear','fox'],bear:['bear','fox','owl']};
 var CR={};
+window._liveList=[];
 
 function checkGate(){
   var val=document.getElementById('gate-input').value;
   var inp=document.getElementById('gate-input');
   var err=document.getElementById('gate-error');
   if(val==='WoodlandReveal2026'){
-    err.textContent='';
-    inp.classList.remove('error');
-    show('s0');
+    err.textContent='';inp.classList.remove('error');show('s0');
   } else {
     inp.classList.add('error');
     err.textContent='Incorrect password — ask the parents!';
@@ -364,6 +407,20 @@ function ca(step){
 }
 function giveUp(step){if(ST.locked[step])return;showAnswerBanner(step,'giveup');progressStep(step);}
 
+async function saveGuess(entry){
+  // Try Firebase first
+  if(window._fbPush){
+    var ok=await window._fbPush(entry);
+    if(ok)return;
+  }
+  // Fallback: localStorage
+  try{
+    var list=JSON.parse(localStorage.getItem('wr_guesses')||'[]');
+    list.push(entry);
+    localStorage.setItem('wr_guesses',JSON.stringify(list));
+  }catch(e){console.error('Save error:',e);}
+}
+
 async function goMap(stage){
   if(stage===0){
     var n=document.getElementById('player-name').value.trim();
@@ -408,6 +465,33 @@ function loadRiddle(step){
   document.getElementById('gu'+step).style.display='block';
   document.getElementById('cont'+step).style.display='none';
   ST.locked[step]=false;ST.attempts=0;
+}
+
+window._renderLB=function(list){
+  list=list||[];
+  var you=ST.savedEntry;
+  // Put current user's entry first if present, then reverse chron
+  list=list.slice().sort((a,b)=>{
+    if(you&&a.ts===you.ts)return -1;
+    if(you&&b.ts===you.ts)return 1;
+    return b.ts-a.ts;
+  });
+  document.getElementById('tb').textContent=list.filter(x=>x.guess==='boy').length;
+  document.getElementById('tg').textContent=list.filter(x=>x.guess==='girl').length;
+  var lb=document.getElementById('lb-list');
+  if(!list.length){lb.innerHTML='<div style="color:#888;font-size:14px;text-align:center;margin-top:1rem;">No guesses yet!</div>';return;}
+  lb.innerHTML=list.map(e=>{
+    var isYou=you&&e.ts===you.ts;
+    var badge=e.guess==='boy'?'<span class="lb-badge lb-boy">Boy</span>':'<span class="lb-badge lb-girl">Girl</span>';
+    var youtag=isYou?'<span class="lb-you">✓ you</span>':'';
+    return '<div class="lb-row" style="'+(isYou?'font-weight:600;background:#f0faf4;border-radius:8px;padding:9px 8px;':'')+'"><span class="lb-name">'+esc(e.name)+youtag+'</span>'+badge+'</div>';
+  }).join('');
+};
+
+function goLeaderboard(){
+  document.getElementById('boy-reveal').classList.remove('active');
+  show('slb');
+  window._renderLB(window._liveList);
 }
 
 function drawMap(){
@@ -531,26 +615,6 @@ function launchBoyConfetti(){
       el.style.cssText=css;area.appendChild(el);setTimeout(()=>{el.style.top=(58+Math.random()*42)+'vh';el.style.opacity='0';},40);setTimeout(()=>el.remove(),5000);
     },i*18);
   }
-}
-
-function goLeaderboard(){document.getElementById('boy-reveal').classList.remove('active');show('slb');loadLB();}
-async function loadLB(){
-  var list=[];
-  try{var res=await window.storage.get('gr_guesses',true);if(res)list=JSON.parse(res.value);}catch(e){}
-  if(ST.savedEntry&&!list.find(x=>x.ts===ST.savedEntry.ts))list.push(ST.savedEntry);
-  document.getElementById('tb').textContent=list.filter(x=>x.guess==='boy').length;
-  document.getElementById('tg').textContent=list.filter(x=>x.guess==='girl').length;
-  var lb=document.getElementById('lb-list');
-  if(!list.length){lb.innerHTML='<div style="color:#888;font-size:14px;text-align:center;margin-top:1rem;">No guesses yet!</div>';return;}
-  lb.innerHTML=list.slice().reverse().map(e=>{
-    var you=ST.savedEntry&&e.ts===ST.savedEntry.ts;
-    var badge=e.guess==='boy'?'<span class="lb-badge lb-boy">Boy</span>':'<span class="lb-badge lb-girl">Girl</span>';
-    var youtag=you?'<span class="lb-you">✓ you</span>':'';
-    return '<div class="lb-row" style="'+(you?'font-weight:600;':'')+'"><span class="lb-name">'+esc(e.name)+youtag+'</span>'+badge+'</div>';
-  }).join('');
-}
-async function saveGuess(entry){
-  try{var ex=null;try{ex=await window.storage.get('gr_guesses',true);}catch(e){}var list=ex?JSON.parse(ex.value):[];list.push(entry);await window.storage.set('gr_guesses',JSON.stringify(list),true);}catch(e){console.error(e);}
 }
 </script>
 </body></html>
