@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html><head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font-sans,'system-ui');background:transparent;}
@@ -10,39 +11,40 @@ h1{font-size:21px;font-weight:500;color:var(--color-text-primary,#111);margin-bo
 p.sub{font-size:14px;color:var(--color-text-secondary,#666);text-align:center;margin-bottom:1.25rem;line-height:1.6;}
 .field-label{font-size:11px;color:#888;margin-bottom:4px;align-self:flex-start;text-transform:uppercase;letter-spacing:.06em;}
 .field-wrap{width:100%;max-width:400px;margin-bottom:1rem;}
-input[type=text],input[type=password]{width:100%;padding:.65rem 1rem;font-size:15px;border:1.5px solid #ccc;border-radius:10px;font-family:inherit;background:#fff;color:#111;outline:none;transition:border-color .2s;}
+input[type=text],input[type=password]{width:100%;padding:.65rem 1rem;font-size:16px;border:1.5px solid #ccc;border-radius:10px;font-family:inherit;background:#fff;color:#111;outline:none;transition:border-color .2s;-webkit-appearance:none;}
 input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
 .guess-row{display:flex;gap:12px;width:100%;max-width:400px;margin-bottom:1.25rem;}
-.guess-btn{flex:1;padding:.8rem;border:2.5px solid #ddd;border-radius:12px;background:#f5f5f5;cursor:pointer;font-size:15px;font-weight:500;color:#777;font-family:inherit;transition:all .2s;}
+.guess-btn{flex:1;padding:.9rem;border:2.5px solid #ddd;border-radius:12px;background:#f5f5f5;cursor:pointer;font-size:15px;font-weight:500;color:#777;font-family:inherit;transition:all .2s;min-height:52px;}
 .guess-btn.sel-boy{background:#1565C0;border-color:#0D47A1;color:#fff;box-shadow:0 3px 10px rgba(21,101,192,.4);}
 .guess-btn.sel-girl{background:#C2185B;border-color:#880E4F;color:#fff;box-shadow:0 3px 10px rgba(194,24,91,.4);}
 .critter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:460px;margin-bottom:1.5rem;}
-.critter-card{background:#f5f5f5;border:2.5px solid #ddd;border-radius:16px;padding:.9rem .4rem .8rem;cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;}
+.critter-card{background:#f5f5f5;border:2.5px solid #ddd;border-radius:16px;padding:.9rem .4rem .8rem;cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;min-height:90px;}
 .critter-card .icon{font-size:30px;display:block;margin-bottom:4px;}
 .critter-card .cname{font-size:12px;font-weight:600;color:#333;margin-bottom:1px;}
 .critter-card .ctype{font-size:10px;color:#888;}
 .critter-card.selected{background:#0F6E56;border-color:#085041;box-shadow:0 3px 14px rgba(15,110,86,.45);}
 .critter-card.selected .cname{color:#fff;}
 .critter-card.selected .ctype{color:#A7F3D0;}
-.btn-main{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.8rem 2rem;font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;transition:background .2s;}
+.btn-main{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.9rem 2rem;font-size:15px;cursor:pointer;font-family:inherit;font-weight:500;transition:background .2s;min-height:50px;-webkit-tap-highlight-color:transparent;}
 .btn-main:disabled{opacity:.35;cursor:not-allowed;}
 .btn-main:hover:not(:disabled){background:#085041;}
-.btn-continue{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.75rem 1.6rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;display:none;margin-top:.9rem;width:100%;}
+.btn-continue{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.9rem 1.6rem;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s;display:none;margin-top:.9rem;width:100%;min-height:50px;-webkit-tap-highlight-color:transparent;}
 .btn-continue:hover{background:#085041;}
-.btn-giveup{background:transparent;border:1.5px solid #ccc;border-radius:10px;padding:.55rem 1.2rem;font-size:13px;cursor:pointer;font-family:inherit;color:#888;transition:all .2s;}
+.btn-giveup{background:transparent;border:1.5px solid #ccc;border-radius:10px;padding:.65rem 1.2rem;font-size:13px;cursor:pointer;font-family:inherit;color:#888;transition:all .2s;min-height:44px;}
 .btn-giveup:hover{background:#f5f5f5;border-color:#aaa;color:#555;}
-.btn-hint-up{background:transparent;border:1.5px solid #C9A84C;border-radius:10px;padding:.55rem 1.2rem;font-size:13px;cursor:pointer;font-family:inherit;color:#8B6914;transition:all .2s;}
+.btn-hint-up{background:transparent;border:1.5px solid #C9A84C;border-radius:10px;padding:.65rem 1.2rem;font-size:13px;cursor:pointer;font-family:inherit;color:#8B6914;transition:all .2s;min-height:44px;}
 .btn-hint-up:hover:not(:disabled){background:#FFFBEF;}
 .btn-hint-up:disabled{opacity:.35;cursor:not-allowed;}
 .riddle-instructions{font-size:12px;color:#888;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:.55rem .8rem;margin-bottom:.85rem;line-height:1.5;}
 .riddle-wrap{width:100%;max-width:520px;}
 .riddle-header{display:flex;align-items:center;gap:14px;margin-bottom:.75rem;background:#f0f4f0;border:1px solid #c8ddc8;border-radius:14px;padding:.9rem 1.1rem;}
-.rh-icon{font-size:42px;line-height:1;}
+.rh-icon{font-size:42px;line-height:1;flex-shrink:0;}
 .rh-name{font-size:15px;font-weight:600;color:#1a1a1a;}
 .rh-sub{font-size:12px;color:#888;margin-top:1px;}
+/* Desktop: side by side. Mobile: stacked */
 .riddle-layout{display:flex;gap:18px;align-items:flex-start;}
 .riddle-q{background:#f0f4f0;border:1px solid #c8ddc8;border-radius:14px;padding:1.1rem;font-size:15px;color:#1a1a1a;line-height:1.7;text-align:center;margin-bottom:.75rem;font-style:italic;}
-.ans-input{width:100%;padding:.65rem 1rem;font-size:15px;border:1.5px solid #ccc;border-radius:10px;font-family:inherit;background:#fff;color:#111;outline:none;transition:border-color .2s;margin-bottom:4px;}
+.ans-input{width:100%;padding:.75rem 1rem;font-size:16px;border:1.5px solid #ccc;border-radius:10px;font-family:inherit;background:#fff;color:#111;outline:none;transition:border-color .2s;margin-bottom:4px;-webkit-appearance:none;}
 .ans-input:focus{border-color:#0F6E56;}
 .ans-input.correct{border-color:#0F6E56;background:#f0faf4;}
 .wrong-msg{color:#993C1D;font-size:13px;text-align:center;min-height:18px;}
@@ -53,7 +55,7 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
 .answer-reveal.toomany-msg{background:#FFF3E0;border:1.5px solid #FFB74D;color:#E65100;}
 .answer-reveal .ans-word{font-size:18px;font-weight:700;display:block;margin-top:3px;}
 .mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem;}
-.mc-btn{padding:.9rem .7rem;border:2px solid #ccc;border-radius:12px;background:#f5f5f5;cursor:pointer;font-size:14px;font-weight:500;color:#333;font-family:inherit;transition:all .2s;text-align:left;line-height:1.4;}
+.mc-btn{padding:.9rem .7rem;border:2px solid #ccc;border-radius:12px;background:#f5f5f5;cursor:pointer;font-size:14px;font-weight:500;color:#333;font-family:inherit;transition:all .2s;text-align:left;line-height:1.4;min-height:56px;-webkit-tap-highlight-color:transparent;}
 .mc-btn:hover:not(:disabled){border-color:#0F6E56;background:#f0faf4;}
 .mc-btn.correct-ans{background:#E8F5E9;border-color:#2E7D32;color:#1B5E20;font-weight:700;}
 .mc-btn.wrong-ans{background:#FDECEA;border-color:#C62828;color:#B71C1C;opacity:.55;}
@@ -61,10 +63,11 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
 .mc-btn:disabled{cursor:not-allowed;}
 .mc-label{font-size:11px;font-weight:700;color:#888;margin-right:6px;}
 .lifeline-row{display:flex;gap:10px;margin-bottom:.75rem;align-items:center;flex-wrap:wrap;}
-.btn-5050{background:linear-gradient(135deg,#1565C0,#0D47A1);color:#fff;border:none;border-radius:10px;padding:.6rem 1.2rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
+.btn-5050{background:linear-gradient(135deg,#1565C0,#0D47A1);color:#fff;border:none;border-radius:10px;padding:.65rem 1.2rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;min-height:44px;-webkit-tap-highlight-color:transparent;}
 .btn-5050:hover:not(:disabled){background:linear-gradient(135deg,#0D47A1,#0A3580);}
 .btn-5050:disabled{opacity:.35;cursor:not-allowed;}
 .lifeline-used{font-size:12px;color:#888;font-style:italic;}
+/* Puzzle column — desktop side panel */
 .puzzle-col{width:88px;flex-shrink:0;display:flex;flex-direction:column;gap:5px;align-items:center;}
 .pp-label{font-size:9px;color:#888;text-align:center;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
 .p-slot{width:82px;height:36px;border-radius:8px;border:2px dashed #ccc;background:#f0f0f0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
@@ -72,56 +75,107 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
 .p-piece.landed{transform:translateY(0) rotate(0deg)!important;opacity:1!important;}
 .p-emoji{font-size:11px;line-height:1;flex-shrink:0;}
 .p-word{font-size:10px;font-weight:700;color:#fff;font-family:Georgia,serif;line-height:1;flex-shrink:0;text-align:center;}
-/* ALL SIX PIECES GREEN — no blue to tip off the reveal */
 .pp0{background:linear-gradient(135deg,#1B5E20,#2E7D32);}
 .pp1{background:linear-gradient(135deg,#2E7D32,#388E3C);}
 .pp2{background:linear-gradient(135deg,#388E3C,#43A047);}
 .pp3{background:linear-gradient(135deg,#33691E,#558B2F);}
 .pp4{background:linear-gradient(135deg,#558B2F,#689F38);}
-.pp5{background:linear-gradient(135deg,#1B5E20,#2E7D32);}
+.pp5{background:linear-gradient(135deg,#1B5E20,#33691E);}
+/* Mobile puzzle — horizontal row at bottom */
+.puzzle-row-mobile{display:none;flex-direction:row;gap:5px;width:100%;margin-top:1rem;justify-content:center;}
+.puzzle-row-mobile .p-slot{width:calc(16.6% - 5px);min-width:44px;height:44px;}
+.puzzle-row-mobile .p-word{font-size:8px;}
 .lb-row{display:flex;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid #eee;width:100%;max-width:480px;font-size:13px;border-radius:8px;}
 .lb-row.you-row{background:#f0faf4;font-weight:600;}
 .lb-rank{font-size:16px;width:28px;text-align:center;flex-shrink:0;}
-.lb-name{flex:1;color:#222;}
+.lb-name{flex:1;color:#222;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .lb-you{font-size:10px;color:#0F6E56;margin-left:3px;font-weight:700;}
 .lb-badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;flex-shrink:0;}
 .lb-boy{background:#E3F2FD;color:#0D47A1;}
 .lb-girl{background:#FCE4EC;color:#880E4F;}
-.lb-score{font-size:13px;font-weight:700;color:#0F6E56;flex-shrink:0;min-width:32px;text-align:right;}
-.tally{display:flex;gap:12px;margin:1rem 0 1rem;width:100%;max-width:480px;}
-.tally-box{flex:1;border-radius:10px;padding:.75rem;text-align:center;}
-.tally-box .num{font-size:24px;font-weight:700;}
-.tally-box .lbl{font-size:11px;margin-top:2px;}
+.lb-score{font-size:13px;font-weight:700;color:#0F6E56;flex-shrink:0;min-width:36px;text-align:right;}
+.tally{display:flex;gap:10px;margin:1rem 0 1rem;width:100%;max-width:480px;}
+.tally-box{flex:1;border-radius:10px;padding:.75rem .5rem;text-align:center;}
+.tally-box .num{font-size:22px;font-weight:700;}
+.tally-box .lbl{font-size:10px;margin-top:2px;}
 .boy-tally{background:#E3F2FD;color:#0D47A1;}
 .girl-tally{background:#FCE4EC;color:#880E4F;}
 .avg-tally{background:#E8F5E9;color:#1B5E20;}
 #confetti-area{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;}
 #boy-reveal{display:none;position:fixed;inset:0;background:#fff;z-index:8888;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:0;}
 #boy-reveal.active{display:flex;}
-#boy-critters{font-size:48px;letter-spacing:14px;opacity:0;transform:translateY(20px);transition:opacity .7s .1s,transform .7s .1s;margin-bottom:1.2rem;line-height:1;text-align:center;}
+#boy-critters{font-size:44px;letter-spacing:12px;opacity:0;transform:translateY(20px);transition:opacity .7s .1s,transform .7s .1s;margin-bottom:1.2rem;line-height:1;text-align:center;}
 #boy-critters.show{opacity:1;transform:translateY(0);}
-#boy-word{font-size:72px;font-weight:900;color:#1565C0;font-family:Georgia,serif;opacity:0;transform:scale(.4);transition:opacity .55s ease-out,transform .55s cubic-bezier(.22,1.3,.6,1);text-shadow:0 4px 24px rgba(21,101,192,.2);line-height:1.1;text-align:center;}
+#boy-word{font-size:68px;font-weight:900;color:#1565C0;font-family:Georgia,serif;opacity:0;transform:scale(.4);transition:opacity .55s ease-out,transform .55s cubic-bezier(.22,1.3,.6,1);text-shadow:0 4px 24px rgba(21,101,192,.2);line-height:1.1;text-align:center;}
 #boy-word.pop{opacity:1;transform:scale(1);}
 #boy-sub{font-size:16px;color:#1565C0;opacity:0;margin-top:1rem;font-family:Georgia,serif;font-style:italic;transition:opacity .6s .4s;text-align:center;}
 #boy-sub.show{opacity:1;}
-#boy-board-btn{margin-top:2rem;background:#fff;border:2.5px solid #C9A84C;border-radius:14px;padding:.85rem 2.2rem;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;color:#0D2B6B;opacity:0;transition:opacity .5s 1s;box-shadow:0 2px 12px rgba(201,168,76,.25);}
+#boy-board-btn{margin-top:2rem;background:#fff;border:2.5px solid #C9A84C;border-radius:14px;padding:.85rem 2.2rem;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;color:#0D2B6B;opacity:0;transition:opacity .5s 1s;box-shadow:0 2px 12px rgba(201,168,76,.25);-webkit-tap-highlight-color:transparent;}
 #boy-board-btn.show{opacity:1;}
 #boy-board-btn:hover{background:#FFFBEF;border-color:#B8922A;}
 #sgate{background:linear-gradient(160deg,#0D2B1F 0%,#1B4332 50%,#0D2B1F 100%);}
-#sgate h1{color:#A7F3D0;font-family:Georgia,serif;font-size:24px;margin-bottom:.5rem;}
+#sgate h1{color:#A7F3D0;font-family:Georgia,serif;font-size:22px;margin-bottom:.5rem;}
 #sgate p.sub{color:#6EE7B7;margin-bottom:2rem;}
-.gate-icon{font-size:60px;margin-bottom:1rem;}
-.gate-box{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:2rem 1.5rem;width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:1rem;}
+.gate-icon{font-size:56px;margin-bottom:1rem;}
+.gate-box{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:1.75rem 1.25rem;width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:1rem;}
 .gate-label{font-size:11px;color:#6EE7B7;text-transform:uppercase;letter-spacing:.1em;align-self:flex-start;}
-#gate-input{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:.75rem 1rem;font-size:15px;width:100%;font-family:inherit;outline:none;}
+#gate-input{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:.8rem 1rem;font-size:16px;width:100%;font-family:inherit;outline:none;-webkit-appearance:none;}
 #gate-input::placeholder{color:rgba(255,255,255,.35);}
 #gate-input:focus{border-color:#6EE7B7;}
 #gate-input.error{border-color:#F87171;animation:shake .35s ease;}
 #gate-error{font-size:13px;color:#F87171;min-height:18px;text-align:center;}
-#gate-btn{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.85rem 2.2rem;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;}
+#gate-btn{background:#0F6E56;color:#fff;border:none;border-radius:10px;padding:.9rem 2.2rem;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;min-height:52px;-webkit-tap-highlight-color:transparent;}
 #gate-btn:hover{background:#085041;}
 .gate-hint{font-size:12px;color:rgba(255,255,255,.35);text-align:center;margin-top:.25rem;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* ── MOBILE OVERRIDES ── max 600px ─────────────────────────────────────────── */
+@media(max-width:600px){
+  .screen{padding:1rem .75rem 1.5rem;}
+  h1{font-size:18px;}
+  p.sub{font-size:13px;margin-bottom:1rem;}
+
+  /* Critter grid 3 cols on mobile — keep but smaller */
+  .critter-card{padding:.7rem .3rem .6rem;min-height:80px;}
+  .critter-card .icon{font-size:26px;}
+  .critter-card .cname{font-size:11px;}
+
+  /* Riddle layout: stack vertically, puzzle panel moves below */
+  .riddle-layout{flex-direction:column;gap:10px;}
+  .puzzle-col{display:none;} /* Hide side panel on mobile */
+  .puzzle-row-mobile{display:flex;} /* Show horizontal row instead */
+
+  .riddle-q{font-size:14px;padding:.9rem;}
+  .riddle-header{padding:.75rem .9rem;gap:10px;}
+  .rh-icon{font-size:34px;}
+  .rh-name{font-size:14px;}
+  .rh-sub{font-size:11px;}
+  .riddle-instructions{font-size:11px;}
+
+  /* Action buttons row — stack on very small */
+  .action-row{flex-wrap:wrap;}
+  .btn-hint-up,.btn-giveup{font-size:12px;padding:.6rem 1rem;}
+
+  /* MC grid — 1 col on mobile for better readability */
+  .mc-grid{grid-template-columns:1fr;}
+  .mc-btn{font-size:14px;min-height:52px;}
+
+  /* Map canvas — full width already, just ensure no overflow */
+  #map-canvas{border-radius:10px;}
+
+  /* Boy reveal */
+  #boy-word{font-size:52px;}
+  #boy-critters{font-size:36px;letter-spacing:8px;}
+  #boy-sub{font-size:14px;}
+  #boy-board-btn{font-size:14px;padding:.8rem 1.6rem;}
+
+  /* Puzzle reveal screen */
+  #puzzle-pieces .slot{height:80px;}
+
+  /* Leaderboard */
+  .lb-name{font-size:12px;}
+  .tally-box .num{font-size:20px;}
+}
 </style>
 </head>
 <body>
@@ -133,25 +187,27 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
   <button id="boy-board-btn" onclick="goLeaderboard()">🎉 See everyone's guesses</button>
 </div>
 
+<!-- PASSWORD GATE -->
 <div id="sgate" class="screen active">
   <div class="gate-icon">🌲🔒🌲</div>
   <h1>The Woods Are Waiting...</h1>
   <p class="sub">Enter the secret password to begin your woodland adventure.</p>
   <div class="gate-box">
     <div class="gate-label">Password</div>
-    <input type="password" id="gate-input" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkGate()"/>
+    <input type="password" id="gate-input" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkGate()" autocomplete="off"/>
     <div id="gate-error"></div>
     <button id="gate-btn" onclick="checkGate()">🌿 Enter the Woods</button>
   </div>
   <p class="gate-hint">Ask the parents for the password!</p>
 </div>
 
+<!-- S0: Intro -->
 <div id="s0" class="screen">
   <h1>A secret waits in the woods...</h1>
   <p class="sub">Enter your name, make your guess what baby will be, then pick your woodland guide!</p>
   <div class="field-wrap">
     <div class="field-label">Your name</div>
-    <input type="text" id="player-name" placeholder="e.g. Grandma Sue" oninput="val0()"/>
+    <input type="text" id="player-name" placeholder="e.g. Grandma Sue" oninput="val0()" autocomplete="off"/>
   </div>
   <div class="field-wrap">
     <div class="field-label">Your guess</div>
@@ -174,13 +230,15 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
   <button class="btn-main" id="btn-s0" onclick="startJourney()" disabled>Begin the trail</button>
 </div>
 
+<!-- MAP -->
 <div id="smap" class="screen">
   <h1 id="map-title">Your woodland trail awaits</h1>
   <p class="sub" id="map-sub">Six guides, six riddles — follow the trail to unlock the secret.</p>
   <canvas id="map-canvas" width="520" height="380" style="width:100%;max-width:520px;border-radius:16px;border:3px solid #8B7355;box-shadow:0 4px 18px rgba(0,0,0,.18);"></canvas>
-  <button class="btn-main" id="map-btn" style="margin-top:1.25rem" onclick="continueFromMap()">Let's go →</button>
+  <button class="btn-main" id="map-btn" style="margin-top:1.25rem;width:100%;max-width:520px;" onclick="continueFromMap()">Let's go →</button>
 </div>
 
+<!-- RIDDLE SCREEN -->
 <div id="sriddle" class="screen">
   <div class="riddle-wrap">
     <div class="riddle-header">
@@ -189,7 +247,9 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
     </div>
     <div id="riddle-instructions" class="riddle-instructions"></div>
     <div class="riddle-layout">
-      <div style="flex:1" id="riddle-body"></div>
+      <!-- Question area -->
+      <div style="flex:1;min-width:0;" id="riddle-body"></div>
+      <!-- Desktop side puzzle panel -->
       <div class="puzzle-col">
         <div class="pp-label">The message</div>
         <div class="p-slot"><div class="p-piece pp0" id="pp0"><span class="p-emoji" id="pe0"></span><span class="p-word">A</span></div></div>
@@ -200,18 +260,30 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
         <div class="p-slot"><div class="p-piece pp5" id="pp5"><span class="p-emoji" id="pe5"></span><span class="p-word">woods...</span></div></div>
       </div>
     </div>
+    <!-- Mobile horizontal puzzle row (shown only on small screens) -->
+    <div class="puzzle-row-mobile" id="puzzle-row-mobile">
+      <div class="p-slot"><div class="p-piece pp0" id="mpp0"><span class="p-emoji" id="mpe0"></span><span class="p-word">A</span></div></div>
+      <div class="p-slot"><div class="p-piece pp1" id="mpp1"><span class="p-emoji" id="mpe1"></span><span class="p-word">little</span></div></div>
+      <div class="p-slot"><div class="p-piece pp2" id="mpp2"><span class="p-emoji" id="mpe2"></span><span class="p-word">secret</span></div></div>
+      <div class="p-slot"><div class="p-piece pp3" id="mpp3"><span class="p-emoji" id="mpe3"></span><span class="p-word">hides</span></div></div>
+      <div class="p-slot"><div class="p-piece pp4" id="mpp4"><span class="p-emoji" id="mpe4"></span><span class="p-word">in the</span></div></div>
+      <div class="p-slot"><div class="p-piece pp5" id="mpp5"><span class="p-emoji" id="mpe5"></span><span class="p-word">woods...</span></div></div>
+    </div>
   </div>
 </div>
 
-<div id="swoods" class="screen" style="padding:0;min-height:440px;justify-content:center;overflow:hidden;border-radius:16px;">
-  <canvas id="woods-canvas" width="520" height="440" style="width:100%;max-width:520px;display:block;border-radius:16px;"></canvas>
+<!-- WOODS -->
+<div id="swoods" class="screen" style="padding:0;min-height:380px;justify-content:center;overflow:hidden;border-radius:16px;">
+  <canvas id="woods-canvas" width="520" height="440" style="width:100%;display:block;border-radius:16px;"></canvas>
 </div>
 
-<div id="spuzzle" class="screen" style="background:#0a0f0a;padding:1.5rem 1rem 2rem;min-height:520px;border-radius:16px;gap:16px;">
+<!-- PUZZLE -->
+<div id="spuzzle" class="screen" style="background:#0a0f0a;padding:1.5rem 1rem 2rem;min-height:480px;border-radius:16px;gap:14px;">
   <p style="font-size:12px;color:#556;text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;">The secret reveals itself...</p>
   <div id="puzzle-pieces" style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:380px;"></div>
 </div>
 
+<!-- LEADERBOARD -->
 <div id="slb" class="screen">
   <h1>The woodland scoreboard</h1>
   <p class="sub">Who knows their animal facts? 🌲</p>
@@ -227,10 +299,9 @@ input[type=text]:focus,input[type=password]:focus{border-color:#0F6E56;}
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getDatabase,ref,push,update,onValue}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 const app=initializeApp({apiKey:'AIzaSyAuHlBGb_xhOpvNGLdza0WnRgreqGGd4rU',authDomain:'woodland-reveal.firebaseapp.com',databaseURL:'https://woodland-reveal-default-rtdb.firebaseio.com',projectId:'woodland-reveal',storageBucket:'woodland-reveal.appspot.com'});
-const db=getDatabase(app);
-const gRef=ref(db,'guesses');
-window._fbPushInitial=async function(e){try{const r=await push(gRef,e);return r.key;}catch(x){console.error(x);return null;}};
-window._fbUpdate=async function(key,data){try{await update(ref(db,'guesses/'+key),data);return true;}catch(e){console.error(e);return false;}};
+const db=getDatabase(app);const gRef=ref(db,'guesses');
+window._fbPushInitial=async function(e){try{const r=await push(gRef,e);return r.key;}catch(x){return null;}};
+window._fbUpdate=async function(key,data){try{await update(ref(db,'guesses/'+key),data);return true;}catch(e){return false;}};
 window._fbListen=function(cb){onValue(gRef,s=>{const d=s.val();cb(d?Object.values(d):[]);});};
 window._fbListen(function(list){window._liveList=list;if(document.getElementById('slb').classList.contains('active'))window._renderLB(list);});
 </script>
@@ -294,8 +365,17 @@ window.pickGuess=pickGuess;
 function pickCritter(el,n){document.querySelectorAll('.critter-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');ST.critter=n;val0();}
 window.pickCritter=pickCritter;
 
-function setPuzzleEmojis(){for(var i=0;i<6;i++){var el=document.getElementById('pe'+i);if(el)el.textContent=CD[ST.order[i]].icon;}}
-function landPiece(idx){var p=document.getElementById('pp'+idx);if(p)p.classList.add('landed');}
+function setPuzzleEmojis(){
+  for(var i=0;i<6;i++){
+    var d=document.getElementById('pe'+i);if(d)d.textContent=CD[ST.order[i]].icon;
+    var m=document.getElementById('mpe'+i);if(m)m.textContent=CD[ST.order[i]].icon;
+  }
+}
+
+function landPiece(idx){
+  var p=document.getElementById('pp'+idx);if(p)p.classList.add('landed');
+  var m=document.getElementById('mpp'+idx);if(m)m.classList.add('landed');
+}
 
 async function startJourney(){
   var n=document.getElementById('player-name').value.trim();
@@ -339,18 +419,19 @@ function loadRiddle(step){
 function buildTypedUI(critter){
   var r=TYPED_Q[critter];
   document.getElementById('riddle-instructions').textContent='🌿 Type your answer! Use the Hint button anytime. Hints also appear after wrong guesses. Answer revealed after 3 tries.';
+  var contLabel=ST.step===5?'Head to the clearing →':'Continue on the trail →';
   document.getElementById('riddle-body').innerHTML=`
     <div class="riddle-q">${r.q}</div>
-    <input class="ans-input" type="text" id="typed-ans" placeholder="Your answer..." onkeydown="if(event.key==='Enter')submitTyped()"/>
+    <input class="ans-input" type="text" id="typed-ans" placeholder="Your answer..." onkeydown="if(event.key==='Enter')submitTyped()" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
     <div class="wrong-msg" id="typed-wrong"></div>
     <div id="typed-hints"></div>
     <div class="answer-reveal" id="typed-reveal"></div>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:.75rem;flex-wrap:wrap;">
+    <div class="action-row" style="display:flex;gap:8px;align-items:center;margin-top:.75rem;flex-wrap:wrap;">
       <button class="btn-main" id="typed-submit" onclick="submitTyped()">Submit</button>
       <button class="btn-hint-up" id="typed-hint-btn" onclick="revealNextHint()">💡 Hint</button>
       <button class="btn-giveup" id="typed-giveup" onclick="giveUpTyped()">I give up</button>
     </div>
-    <button class="btn-continue" id="typed-cont" onclick="progressStep()">${ST.step===5?'Head to the clearing →':'Continue on the trail →'}</button>
+    <button class="btn-continue" id="typed-cont" onclick="progressStep()">${contLabel}</button>
   `;
   document.getElementById('typed-ans').oninput=function(){if(!ST.locked)document.getElementById('typed-wrong').textContent='';};
 }
@@ -370,23 +451,16 @@ function submitTyped(){
   var inp=document.getElementById('typed-ans').value;
   var r=TYPED_Q[ST.order[ST.step]];
   if(isClose(inp,r.answers)){
-    showTypedReveal('correct',r);
-    ST.score++;updateFirebaseScore();
-    lockTyped();showContinueTyped();
+    showTypedReveal('correct',r);ST.score++;updateFirebaseScore();lockTyped();showContinueTyped();
   } else {
-    ST.attempts++;
-    document.getElementById('typed-wrong').textContent='Not quite — try again!';
+    ST.attempts++;document.getElementById('typed-wrong').textContent='Not quite — try again!';
     revealNextHint();
     if(ST.attempts>=3){showTypedReveal('toomany',r);lockTyped();showContinueTyped();}
   }
 }
 window.submitTyped=submitTyped;
 
-function giveUpTyped(){
-  if(ST.locked)return;
-  showTypedReveal('giveup',TYPED_Q[ST.order[ST.step]]);
-  lockTyped();showContinueTyped();
-}
+function giveUpTyped(){if(ST.locked)return;showTypedReveal('giveup',TYPED_Q[ST.order[ST.step]]);lockTyped();showContinueTyped();}
 window.giveUpTyped=giveUpTyped;
 
 function showTypedReveal(type,r){
@@ -396,12 +470,14 @@ function showTypedReveal(type,r){
   else if(type==='giveup'){el.className='answer-reveal giveup-msg';el.innerHTML='No worries — now you know! 💙<span class="ans-word">A baby '+animal+' is called a '+ans+'.</span>';}
   else{el.className='answer-reveal toomany-msg';el.innerHTML='Almost! That was a tough one. 🌿<span class="ans-word">A baby '+animal+' is called a '+ans+'.</span>';}
 }
+
 function lockTyped(){ST.locked=true;['typed-ans','typed-submit','typed-hint-btn'].forEach(id=>{var el=document.getElementById(id);if(el)el.disabled=true;});var g=document.getElementById('typed-giveup');if(g)g.style.display='none';}
 function showContinueTyped(){var c=document.getElementById('typed-cont');if(c){c.textContent=ST.step===5?'Head to the clearing →':'Continue on the trail →';c.style.display='block';}}
 
 function buildMCUI(critter){
   var r=MC_Q[critter];
   document.getElementById('riddle-instructions').textContent='🎯 Choose the correct answer! Use 50/50 to eliminate two wrong answers — but only one guess remains after!';
+  var contLabel=ST.step===5?'Head to the clearing →':'Continue on the trail →';
   var opts=r.options.map((o,i)=>`<button class="mc-btn" id="mc-btn-${i}" onclick="selectMC(${i})"><span class="mc-label">${['A','B','C','D'][i]})</span>${esc(o)}</button>`).join('');
   document.getElementById('riddle-body').innerHTML=`
     <div class="riddle-q">${r.q}</div>
@@ -412,7 +488,7 @@ function buildMCUI(critter){
     <div class="mc-grid">${opts}</div>
     <div id="mc-hints"></div>
     <div class="answer-reveal" id="mc-reveal"></div>
-    <button class="btn-continue" id="mc-cont" style="display:none" onclick="progressStep()">${ST.step===5?'Head to the clearing →':'Continue on the trail →'}</button>
+    <button class="btn-continue" id="mc-cont" style="display:none" onclick="progressStep()">${contLabel}</button>
   `;
 }
 
@@ -422,10 +498,7 @@ function selectMC(idx){
   var btn=document.getElementById('mc-btn-'+idx);
   if(!btn||btn.disabled)return;
   if(idx===r.correct){
-    btn.classList.add('correct-ans');
-    showMCReveal('correct',r);
-    ST.score++;updateFirebaseScore();
-    lockMC();showContinueMC();
+    btn.classList.add('correct-ans');showMCReveal('correct',r);ST.score++;updateFirebaseScore();lockMC();showContinueMC();
   } else {
     btn.classList.add('wrong-ans');btn.disabled=true;ST.attempts++;
     if(!ST.used5050){var ha=document.getElementById('mc-hints');if(!ha.querySelector('.hint-item')){var d=document.createElement('div');d.className='hint-item';d.textContent=r.hint;ha.appendChild(d);}}
@@ -456,20 +529,17 @@ function showMCReveal(type,r){
 function lockMC(){ST.locked=true;for(var i=0;i<4;i++){var b=document.getElementById('mc-btn-'+i);if(b)b.disabled=true;}var lb=document.getElementById('btn5050');if(lb)lb.disabled=true;}
 function showContinueMC(){var c=document.getElementById('mc-cont');if(c){c.textContent=ST.step===5?'Head to the clearing →':'Continue on the trail →';c.style.display='block';}}
 
-function progressStep(){
-  landPiece(ST.step);ST.step++;
-  if(ST.step>=6){startWoods();return;}
-  showMap(ST.step);
-}
+function progressStep(){landPiece(ST.step);ST.step++;if(ST.step>=6){startWoods();return;}showMap(ST.step);}
 window.progressStep=progressStep;
 
-async function updateFirebaseScore(){
-  if(ST.fbKey&&window._fbUpdate){await window._fbUpdate(ST.fbKey,{score:ST.score});}
-}
+async function updateFirebaseScore(){if(ST.fbKey&&window._fbUpdate){await window._fbUpdate(ST.fbKey,{score:ST.score});}}
 
-var WP_LABELS=['Trailhead','Mossy Ridge','Whispering Creek','The Old Oak','Squirrel\'s Hollow','The Clearing'];
+var WP_LABELS=['Trailhead','Mossy Ridge','Whisp. Creek','The Old Oak','Squirrel\'s Hollow','The Clearing'];
+
 function drawMap(){
-  var cv=document.getElementById('map-canvas'),ctx=cv.getContext('2d'),W=520,H=380;
+  var cv=document.getElementById('map-canvas');
+  var ctx=cv.getContext('2d');
+  var W=520,H=380;
   ctx.clearRect(0,0,W,H);
   var bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#F7EDD0');bg.addColorStop(.5,'#EDD9A3');bg.addColorStop(1,'#E2C97E');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   var vig=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.9);vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(80,50,10,.22)');ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
@@ -542,22 +612,15 @@ function startPuzzle(){
   show('spuzzle');
   var container=document.getElementById('puzzle-pieces');container.innerHTML='';
   var words=['A','little','secret','hides','in the','woods...'];
-  // All green — no blue, no tipoff
-  var colors=[
-    'linear-gradient(135deg,#1B5E20,#2E7D32)',
-    'linear-gradient(135deg,#2E7D32,#388E3C)',
-    'linear-gradient(135deg,#388E3C,#43A047)',
-    'linear-gradient(135deg,#33691E,#558B2F)',
-    'linear-gradient(135deg,#558B2F,#689F38)',
-    'linear-gradient(135deg,#1B5E20,#33691E)'
-  ];
+  var colors=['linear-gradient(135deg,#1B5E20,#2E7D32)','linear-gradient(135deg,#2E7D32,#388E3C)','linear-gradient(135deg,#388E3C,#43A047)','linear-gradient(135deg,#33691E,#558B2F)','linear-gradient(135deg,#558B2F,#689F38)','linear-gradient(135deg,#1B5E20,#33691E)'];
   var delays=[600,1500,2500,3600,4800,6100];
   words.forEach((word,i)=>{
     var emoji=CD[ST.order[i]].icon;
-    var slot=document.createElement('div');slot.style.cssText='width:100%;height:100px;border-radius:14px;border:2px dashed rgba(255,255,255,.15);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:border-color .3s;';
-    var piece=document.createElement('div');piece.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;border-radius:12px;background:'+colors[i]+';transform:translateY(-130px) rotate(-3deg);opacity:0;transition:transform .65s cubic-bezier(.22,1.4,.6,1),opacity .4s,box-shadow .4s;';
-    var eSpan=document.createElement('span');eSpan.textContent=emoji;eSpan.style.cssText='font-size:26px;line-height:1;';
-    var wSpan=document.createElement('span');wSpan.textContent=word;wSpan.style.cssText='font-size:'+(i===5?24:i>=4?26:30)+'px;font-weight:700;color:#fff;font-family:Georgia,serif;text-shadow:0 2px 10px rgba(0,0,0,.35);';
+    var slot=document.createElement('div');
+    slot.style.cssText='width:100%;height:90px;border-radius:14px;border:2px dashed rgba(255,255,255,.15);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:border-color .3s;';
+    var piece=document.createElement('div');piece.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;border-radius:12px;background:'+colors[i]+';transform:translateY(-120px) rotate(-3deg);opacity:0;transition:transform .65s cubic-bezier(.22,1.4,.6,1),opacity .4s,box-shadow .4s;';
+    var eSpan=document.createElement('span');eSpan.textContent=emoji;eSpan.style.cssText='font-size:24px;line-height:1;';
+    var wSpan=document.createElement('span');wSpan.textContent=word;wSpan.style.cssText='font-size:'+(i===5?22:i>=4?24:28)+'px;font-weight:700;color:#fff;font-family:Georgia,serif;text-shadow:0 2px 10px rgba(0,0,0,.35);';
     piece.appendChild(eSpan);piece.appendChild(wSpan);slot.appendChild(piece);container.appendChild(slot);
     setTimeout(()=>{
       slot.style.borderColor='rgba(255,220,80,.8)';
